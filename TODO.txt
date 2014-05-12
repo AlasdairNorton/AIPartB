@@ -1,0 +1,9 @@
+DONE:
+- Imported code from part 1
+- Altered board representation to use integers (-1 invalid, 0 empty, 1 white, 2 black)
+	rather than characters, according to piece interface.
+- Made a basic random move generator
+- Implemented OpponentMove, Init, Printboard, getWinner in Ajnorton.java
+(GetWinner not tested)
+
+Currently, will play against itself, putting pieces down at random.
