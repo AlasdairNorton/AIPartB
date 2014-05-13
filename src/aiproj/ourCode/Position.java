@@ -1,4 +1,4 @@
-package aiproj.partA;
+package aiproj.ourCode;
 import aiproj.fencemaster.Piece;
 /* Alasdair Norton (ajnorton)
  * Mostafa Rizk (mrizk) */

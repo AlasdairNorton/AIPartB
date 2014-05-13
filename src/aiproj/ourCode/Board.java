@@ -1,4 +1,4 @@
-package aiproj.partA;
+package aiproj.ourCode;
 
 /* Alasdair Norton (ajnorton)
  * Mostafa Rizk (mrizk) */
@@ -23,7 +23,9 @@ public class Board implements Piece{
 	/* Arraylist containing all clusters (continuous groups of same-coloured pieces) */
 	private ArrayList<Cluster> clusters;
 	
-	/* Creates a new board defined by the standard input */
+	/* Creates a new board defined by the standard input 
+	 * Not used in Part B, not guaranteed to be compatible with rest
+	 * of code */
 	public Board (){
 		/* Initialise instance variables */
 		clusters = new ArrayList<Cluster>();		
@@ -104,17 +106,9 @@ public class Board implements Piece{
 		}
 
 		/* For each cell in the board */
-		for(i=0;i<2*arraySize-1;i++){
-			for(j=Math.max(0, i-arraySize+1); j< Math.min(arraySize+i, 2*arraySize-1) ;j++){
-				if(i==0 || i== 2*arraySize-2
-						|| j==Math.max(0, i-arraySize+1)
-						|| j==Math.min(arraySize+i, 2*arraySize-1)-1){
-					/* Skip (Used to initialise invalid, but doing that for all non-board cells now)
-					 * Should update loop to ignore these cells at some point */
-				}else{	
+		for(i=1;i<2*arraySize-2;i++){
+			for(j=Math.max(1, i-arraySize+2); j< Math.min(arraySize+i-1, 2*arraySize-2) ;j++){
 					nodes[i][j] = new Position(i,j,EMPTY);
-				}
-				
 			}
 		}
 	}
@@ -172,6 +166,16 @@ public class Board implements Piece{
 			}
 		}
 		clusters.add(newCluster);
+	}
+	
+	public void clearClusters(){
+		int i, j;
+		for(i=1;i<2*arraySize-2;i++){
+			for(j=Math.max(1, i-arraySize+2); j< Math.min(arraySize+i-1, 2*arraySize-2) ;j++){
+				nodes[i][j].setParentCluster(null);
+			}
+		}
+		this.clusters.clear();
 	}
 	
 	public int getNumPieces(){

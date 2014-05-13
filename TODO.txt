@@ -1,9 +1,24 @@
 DONE:
-- Imported code from part 1
+- Imported code from part A
 - Altered board representation to use integers (-1 invalid, 0 empty, 1 white, 2 black)
 	rather than characters, according to piece interface.
-- Made a basic random move generator
-- Implemented OpponentMove, Init, Printboard, getWinner in Ajnorton.java
-(GetWinner not tested)
+	
+Player class implementation in TestPlayer1.
+- Implemented OpponentMove, Init, Printboard, getWinner in testPlayer1.java
+- Currently makeMove prompts a user for input, for the sake of testing the
+ other functions. This function is where the decision making logic should go.
+- I'd like to keep the user input player for general testing purposes, so when
+implementing new decision making logic, put it in a new copy of the class
+ (TestPlayer2, etc.)
+ 
+-To run the program, Referee.java takes 3 arguments; the size of the board and
+the class of each player.
+I've been testing using
+6
+aiproj.ourCode.testPlayer1
+aiproj.ourCode.testPlayer1
 
-Currently, will play against itself, putting pieces down at random.
+
+ 
+
+ 

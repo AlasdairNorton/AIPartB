@@ -1,12 +1,14 @@
-package aiproj.fencemaster;
+package aiproj.ourCode;
 
 
-import aiproj.partA.*;
+import aiproj.fencemaster.Move;
+import aiproj.fencemaster.Piece;
+import aiproj.fencemaster.Player;
 
 import java.io.PrintStream;
-import java.util.Random;
+import java.util.Scanner;
 
-public class Ajnorton implements Player, Piece {
+public class TestPlayer1 implements Player, Piece {
 
 	private Board board;
 	private int piece;
@@ -15,10 +17,11 @@ public class Ajnorton implements Player, Piece {
 	public int getWinner() {
 		// Taken from Controller.java, from Part A
 		Boolean[] win = {false, false, false, false};
+		board.clearClusters();
 		board.makeClusters();
 		for(Cluster clust: board.getClusters()){
 			/* For each cluster, test win conditions */
-			if(clust.getColour() == 'B'){
+			if(clust.getColour() == BLACK){
 				if(clust.testTripod(board)){
 					win[0]=true;
 				}
@@ -27,7 +30,7 @@ public class Ajnorton implements Player, Piece {
 					win[1]=true;
 				}
 			}
-			if(clust.getColour() == 'W'){
+			if(clust.getColour() == WHITE){
 				if(clust.testTripod(board)){
 					win[2]=true;
 				}
@@ -74,15 +77,14 @@ public class Ajnorton implements Player, Piece {
 		// The actual AI Component
 		// Generates a random move for testing
 		
-		Random rng = new Random();
-		int r = 0, c = 0, cycles=0;
-		while(cycles<100 && (board.getNodes()[r][c].getColour()==INVALID
-				|| board.getNodes()[r][c].getColour()==BLACK
-				|| board.getNodes()[r][c].getColour()==WHITE)){
-			r = rng.nextInt(board.getArraySize()*2-1);
-			c = rng.nextInt(board.getArraySize()*2-1);
-			cycles++;
-		}
+		int r = 0, c = 0;
+		Scanner sc = new Scanner(System.in);
+		String[] colors = {"White", "Black"};
+		
+		System.out.print(colors[this.piece-1]+" to play:");
+		c = sc.nextInt();
+		r = sc.nextInt();
+		
 		Move move = new Move(piece, false, r, c);
 		board.getNodes()[c+1][r+1].setColour(piece);
 		return move;
@@ -131,20 +133,17 @@ public class Ajnorton implements Player, Piece {
 	public void printBoard(PrintStream output) {
 		// TODO Auto-generated method stub
 		char[] cells = {'O', '-', 'W', 'B'};
-		int i, j;
+		int i, j, k;
 		int size = board.getArraySize();
 		Position[][] nodes = board.getNodes();
 		
-		for(i=0;i<2*size-1;i++){
-			for(j=Math.max(0, i-size+1); j< Math.min(size+i, 2*size-1) ;j++){
-				if(i==0 || i== 2*size-2
-						|| j==Math.max(0, i-size+1)
-						|| j==Math.min(size+i, 2*size-1)-1){
-					/* Skip (Used to initialise invalid, but doing that for all non-board cells now)
-					 * Should update loop to ignore these cells at some point */
-				}else{
-					output.print(cells[nodes[i][j].getColour()+1]);
-				}
+		for(i=1;i<2*size-2;i++){
+			for(k=0;k<Math.abs(size-i-1);k++){
+				/* Indent row */
+				output.print(" ");
+			}
+			for(j=Math.max(1, i-size+2); j< Math.min(size+i-1, 2*size-2) ;j++){
+					output.print(cells[nodes[i][j].getColour()+1]+" ");
 			}
 			output.print("\n");
 		}

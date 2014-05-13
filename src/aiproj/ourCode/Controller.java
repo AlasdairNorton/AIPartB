@@ -1,4 +1,4 @@
-package aiproj.partA;
+package aiproj.ourCode;
 
 /* CONTROLLER NOT UPDATED FOR INTEGER BOARD.
  * Will not be used in this part (should be deleted before submission, kept around because code is useful elsewhere)

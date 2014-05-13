@@ -1,4 +1,4 @@
-package aiproj.partA;
+package aiproj.ourCode;
 
 /* Alasdair Norton (ajnorton)
  * Mostafa Rizk (mrizk) */
