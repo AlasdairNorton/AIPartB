@@ -1,16 +1,17 @@
 package aiproj.ourCode;
 
 //TODO
-//Check that r and c aren't switched
-//Check that priority queue isn't sorting in reverse order
+//Check that r and c aren't switched in some places
+//Check that priority queue is putting new values in the right place
 //Change so that adjacent positions with more strategic value are recognized and given more points
-//Change to be forward-looking, i.e. change utility points added if position has more influence on surroundings
+//Change to be forward-looking, i.e. change utility points added if choosing position would yield more high point options
 
 import aiproj.fencemaster.Move;
 import aiproj.fencemaster.Piece;
 import aiproj.fencemaster.Player;
 
 import java.io.PrintStream;
+import java.util.Collections;
 import java.util.PriorityQueue;
 import java.util.Scanner;
 
@@ -19,7 +20,8 @@ public class TestPlayer2 implements Player, Piece {
 	private Board board;
 	private int piece;
 	
-	private PriorityQueue<Position> queue = new PriorityQueue<Position> ();
+	//private int board_size = board.getSize();
+	private PriorityQueue<Position> queue = new PriorityQueue<Position> (10, Collections.reverseOrder());
 	
 	@Override
 	public int getWinner() {
@@ -87,12 +89,12 @@ public class TestPlayer2 implements Player, Piece {
 	{
 		int N = board.getSize();
 		
-		for(int i=0; i<2*N-1; i++)
+		for(int i=0; i<2*N; i++)
 		{
-			for(int j=0; j<2*N-1; j++)
+			for(int j=0; j<2*N; j++)
 			{
 				//Ignore out of bounds areas
-				if(board.getNodes()[i][j].getColour() == INVALID)
+				if(board.getNodes()[j+1][i+1].getColour() == INVALID)
 					continue;
 				
 				//Add corner pieces
@@ -103,8 +105,8 @@ public class TestPlayer2 implements Player, Piece {
 					(i==(N-1) && j==0) || //middle left corner
 					(i==(N-1) && j==(2*N-2))) //middle right corner
 				{
-					board.getNodes()[i][j].setUtility(0);
-					queue.add(board.getNodes()[i][j]);
+					board.getNodes()[j+1][i+1].setUtility(0);
+					queue.add(board.getNodes()[j+1][i+1]);
 				}
 				
 				//Add edge pieces
@@ -116,8 +118,8 @@ public class TestPlayer2 implements Player, Piece {
 						((i<N) && (j>=N)) //upper right edge
 						)
 				{
-					board.getNodes()[i][j].setUtility(2);
-					queue.add(board.getNodes()[i][j]);
+					board.getNodes()[j+1][i+1].setUtility(2);
+					queue.add(board.getNodes()[j+1][i+1]);
 				}
 				
 				//Add near-corner pieces
@@ -129,15 +131,15 @@ public class TestPlayer2 implements Player, Piece {
 						(i==1 && j==N-1) //top right
 						)
 				{
-					board.getNodes()[i][j].setUtility(3);
-					queue.add(board.getNodes()[i][j]);
+					board.getNodes()[j+1][i+1].setUtility(3);
+					queue.add(board.getNodes()[j+1][i+1]);
 				}
 				
 				//Other pieces
 				else
 				{
-					board.getNodes()[i][j].setUtility(1);
-					queue.add(board.getNodes()[i][j]);
+					board.getNodes()[j+1][i+1].setUtility(1);
+					queue.add(board.getNodes()[j+1][i+1]);
 				}
 			}
 		}
@@ -149,21 +151,18 @@ public class TestPlayer2 implements Player, Piece {
 	 */
 	private void updateQueue(Move move)
 	{
-		if(board.getNumPieces() == 0)
-			rateBoard();
-		
 		//rate positions surrounding move
 		int r[] = {0,-1,-1,0,1,1};
 		int c[] = {-1,-1,0,1,1,0};
 		
 		for(int i=0;i<6;i++)
 		{
-			if(board.getNodes()[move.Row+r[i]][move.Col+c[i]].getColour() != EMPTY)
+			if(move.Row+r[i] < 0 || move.Col+c[i] < 0 || board.getNodes()[move.Col+c[i]][move.Row+r[i]].getColour() != EMPTY)
 				continue;
 			
-			int newUtility = board.getNodes()[move.Row+r[i]][move.Col+c[i]].getUtility()+1;
-			board.getNodes()[move.Row+r[i]][move.Col+c[i]].setUtility(newUtility);
-			queue.add(board.getNodes()[move.Row+r[i]][move.Col+c[i]]);
+			int newUtility = board.getNodes()[move.Col+c[i]][move.Row+r[i]].getUtility()+30;
+			board.getNodes()[move.Col+c[i]][move.Row+r[i]].setUtility(newUtility);
+			queue.add(board.getNodes()[move.Col+c[i]][move.Row+r[i]]);
 		}
 		
 	}
@@ -171,6 +170,9 @@ public class TestPlayer2 implements Player, Piece {
 	@Override
 	public Move makeMove() {
 		// The actual AI Component
+		
+		if(board.getNumPieces() == 0)
+			rateBoard();
 		
 		int r = 0, c = 0;
 
@@ -180,7 +182,7 @@ public class TestPlayer2 implements Player, Piece {
 			r = p.getX();
 			c = p.getY();
 			
-			if(board.getNodes()[r][c].getColour()==EMPTY)
+			if(board.getNodes()[c+1][r+1].getColour()==EMPTY)
 			{
 				break;
 			}
@@ -189,7 +191,8 @@ public class TestPlayer2 implements Player, Piece {
 		}
 		
 		Move move = new Move(piece, false, r, c);
-		board.getNodes()[r][c].setColour(piece);
+		board.getNodes()[c+1][r+1].setColour(piece);
+		updateQueue(move);
 		return move;
 	}
 
@@ -213,6 +216,7 @@ public class TestPlayer2 implements Player, Piece {
 			if(board.getNumPieces()==1 && board.getNodes()[m.Col+1][m.Row+1].getColour()==this.piece){
 				/* Perform swap, return success */
 				board.getNodes()[m.Col+1][m.Row+1].setColour(m.P);
+				updateQueue(m);
 				return 0;
 			}else{
 				/* Swap is illegal- there are too many pieces on the board
@@ -226,6 +230,7 @@ public class TestPlayer2 implements Player, Piece {
 		/* If not swap, check position specified is legal, empty */
 		if(board.getNodes()[m.Col+1][m.Row+1].getColour() == EMPTY){
 			board.getNodes()[m.Col+1][m.Row+1].setColour(m.P);
+			updateQueue(m);
 			return 0;
 		}
 		
