@@ -5,9 +5,10 @@ import aiproj.fencemaster.Piece;
  
  
 import java.util.ArrayList;
+import java.util.Comparator;
 
 
-public class Position implements Piece{
+public class Position implements Piece,Comparator<Position>, Comparable<Position>{
 	/* The tile's x coordinate */
 	private int x;
 	/* The tile's y coordinate */
@@ -16,6 +17,8 @@ public class Position implements Piece{
 	private int colour;
 	/* The cluster this node belongs to (null by default) */
 	private Cluster parentCluster;
+	/* The utility of this position to the player*/
+	private int utility;
 	
 	public Position(int y, int x, int colour) {
 		super();
@@ -48,6 +51,12 @@ public class Position implements Piece{
 	}
 	public void setColour(int colour) {
 		this.colour = colour;
+	}
+	public int getUtility() {
+		return utility;
+	}
+	public void setUtility(int utility) {
+		this.utility = utility;
 	}
 	
 	/* Takes the board containing this position, returns the
@@ -90,6 +99,16 @@ public class Position implements Piece{
 		}
 
 		return adjacents;
+	}
+
+	@Override
+	public int compareTo(Position p) {
+		return this.getUtility() - p.getUtility();
+	}
+
+	@Override
+	public int compare(Position p1, Position p2) {
+		return p1.getUtility() - p2.getUtility();
 	}
 	
 }
