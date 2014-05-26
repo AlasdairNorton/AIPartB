@@ -15,48 +15,7 @@ public class TestPlayer1 implements Player, Piece {
 	
 	@Override
 	public int getWinner() {
-		// Taken from Controller.java, from Part A
-		Boolean[] win = {false, false, false, false};
-		board.clearClusters();
-		board.makeClusters();
-		for(Cluster clust: board.getClusters()){
-			/* For each cluster, test win conditions */
-			if(clust.getColour() == BLACK){
-				if(clust.testTripod(board)){
-					win[0]=true;
-				}
-				
-				if(clust.testLoop(board)){
-					win[1]=true;
-				}
-			}
-			if(clust.getColour() == WHITE){
-				if(clust.testTripod(board)){
-					win[2]=true;
-				}
-				
-				if(clust.testLoop(board)){
-					win[3]=true;
-				}
-			}
-		}
-		if((win[0] || win[1]) && !win[2] && !win[3]){
-			// Black Wins
-			return BLACK;
-		}
-		if(!win[0] && !win[1] && (win[2] || win[3])){
-			// White wins
-			return WHITE;
-		}
-		if((win[0] || win[1]) && (win[2] || win[3])){
-			// Draw
-			return EMPTY;
-		}
-		if(!win[0] && !win[1] && !win[2] && !win[3]){
-			// Non-final state
-			return INVALID;
-		}
-		return INVALID;
+		return board.testWin();
 	}
 
 	@Override
@@ -82,11 +41,11 @@ public class TestPlayer1 implements Player, Piece {
 		String[] colors = {"White", "Black"};
 		
 		System.out.print(colors[this.piece-1]+" to play:");
-		c = sc.nextInt();
 		r = sc.nextInt();
+		c = sc.nextInt();
 		
 		Move move = new Move(piece, false, r, c);
-		board.getNodes()[c+1][r+1].setColour(piece);
+		board.getNodes()[r+1][c+1].setColour(piece);
 		return move;
 	}
 
@@ -107,9 +66,9 @@ public class TestPlayer1 implements Player, Piece {
 			 * 2. That piece is at the coordinates specified
 			 * 3. It is this player's piece
 			 */
-			if(board.getNumPieces()==1 && board.getNodes()[m.Col+1][m.Row+1].getColour()==this.piece){
+			if(board.getNumPieces()==1 && board.getNodes()[m.Row+1][m.Col+1].getColour()==this.piece){
 				/* Perform swap, return success */
-				board.getNodes()[m.Col+1][m.Row+1].setColour(m.P);
+				board.getNodes()[m.Row+1][m.Col+1].setColour(m.P);
 				return 0;
 			}else{
 				/* Swap is illegal- there are too many pieces on the board
@@ -121,8 +80,8 @@ public class TestPlayer1 implements Player, Piece {
 		}
 		
 		/* If not swap, check position specified is legal, empty */
-		if(board.getNodes()[m.Col+1][m.Row+1].getColour() == EMPTY){
-			board.getNodes()[m.Col+1][m.Row+1].setColour(m.P);
+		if(board.getNodes()[m.Row+1][m.Col+1].getColour() == EMPTY){
+			board.getNodes()[m.Row+1][m.Col+1].setColour(m.P);
 			return 0;
 		}
 		

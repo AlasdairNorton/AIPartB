@@ -129,7 +129,7 @@ public class Board implements Piece{
 			for(j=Math.max(0, i-arraySize+1);j< Math.min(arraySize+i, 2*arraySize-1);j++){
 				node = nodes[i][j];
 				if(node.getParentCluster() == null
-						&& node.getColour()!='-' && node.getColour()!='O'){
+						&& node.getColour()!=EMPTY && node.getColour()!=INVALID){
 					// Node is not in a cluster and is not empty
 					fillCluster(node);
 				}
@@ -184,12 +184,57 @@ public class Board implements Piece{
 		for(i=0;i<2*arraySize-1;i++){
 			for(j=Math.max(0, i-arraySize+1);j< Math.min(arraySize+i, 2*arraySize-1);j++){
 				node = nodes[i][j];
-				if(node.getColour() == 'B' || node.getColour()=='W'){
+				if(node.getColour() == BLACK || node.getColour()==WHITE){
 					count++;
 				}
 			}
 		}
 		return count;
+	}
+	
+	public int testWin(){
+		// Taken from Controller.java, from Part A
+		Boolean[] win = {false, false, false, false};
+		this.clearClusters();
+		this.makeClusters();
+		for(Cluster clust: this.getClusters()){
+		/* For each cluster, test win conditions */
+			if(clust.getColour() == BLACK){
+				if(clust.testTripod(this)){
+					win[0]=true;
+				}
+				
+				if(clust.testLoop(this)){
+					win[1]=true;
+				}
+			}
+			if(clust.getColour() == WHITE){
+				if(clust.testTripod(this)){
+					win[2]=true;
+				}
+				
+				if(clust.testLoop(this)){
+					win[3]=true;
+				}
+			}
+		}
+		if((win[0] || win[1]) && !win[2] && !win[3]){
+			// Black Wins
+			return BLACK;
+		}
+		if(!win[0] && !win[1] && (win[2] || win[3])){
+			// White wins
+			return WHITE;
+		}
+		if((win[0] || win[1]) && (win[2] || win[3])){
+			// Draw
+			return EMPTY;
+		}
+		if(!win[0] && !win[1] && !win[2] && !win[3]){
+			// Non-final state
+			return INVALID;
+		}
+		return INVALID;
 	}
 	
 	public int getSize() {
@@ -212,7 +257,7 @@ public class Board implements Piece{
 	}
 	
 	public void setNode(int Piece, int Row, int Col){
-		this.nodes[Col][Row].setColour(Piece);
+		this.nodes[Row][Col].setColour(Piece);
 	}
 	
 	public int getArraySize() {

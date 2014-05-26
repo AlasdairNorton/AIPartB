@@ -19,6 +19,11 @@ aiproj.ourCode.testPlayer1
 aiproj.ourCode.testPlayer1
 
 
+Check coordinate system for TestPlayer2. Should use board[ROW][COLUMN] consistently.
+Also ensure that tile referencing is correct in both taking opponent moves and sending own moves- 
+Oppenent moves should be transformed with +1/+1 (e.g. a move to (1,1) in the referee coord system is (2,2) in our board's)
+When the agent makes a move, the coordinates should be transformed -1,-1 (again, trying to place at (2,2) in our board
+coords, is (1,1) in the referee's)
  
 
  
