@@ -83,6 +83,57 @@ public class TestPlayer2 implements Player, Piece {
 	}
 	
 	/**
+	 * Given row i and column j, determines whether the position is a corner, edge, etc. 
+	 * @param i
+	 * @param j
+	 * @return type of position
+	 */
+	private String checkPositionType(int i,int j)
+	{
+		String type;
+		int N = board.getSize();
+		
+		if(i < 0 || j < 0 || i >= 2*N || j >= 2*N || board.getNodes()[j+1][i+1].getColour() == INVALID)
+			type = "invalid";
+		
+		else if((i==0 && j==0) || //top left corner
+				(i==0 && j==N-1) || //top right corner
+				(i==(2*N -2) && j==(2*N -2)) || //bottom right corner
+				(i==(2*N -2) && j==(N-1)) || //bottom left corner
+				(i==(N-1) && j==0) || //middle left corner
+				(i==(N-1) && j==(2*N-2))) //middle right corner
+			{
+				type = "corner";
+			}
+
+		else if( (i==0) || //top edge
+				(j==0) || //upper left edge
+				(i==(2*N-2)) || //bottom edge
+				(j==(2*N-2)) || //bottom right edge
+				((i>=N) && (j<N)) || //bottom left edge
+				((i<N) && (j>=N)) //upper right edge
+				)
+		{
+			type = "edge";
+		}
+		
+		else if( ( i==1 && j==1) || //top left
+				(i==(2*N-3) && j==(2*N-3)) || //bottom right
+				(i==(2*N-3) && j==(N-1) ) || //bottom left
+				(i==N-1 && j==1) || //middle left
+				(i==N-1 && j==(2*N-3)) || //middle right
+				(i==1 && j==N-1) //top right
+				)
+		{
+			type = "near_edge";
+		}
+		
+		else type = "normal";
+		
+		return type;
+	}
+	
+	/**
 	 * Rates utility of different board positions prior to any moves being made
 	 */
 	private void rateBoard()
@@ -93,52 +144,37 @@ public class TestPlayer2 implements Player, Piece {
 		{
 			for(int j=0; j<2*N; j++)
 			{
+				String type = checkPositionType(i,j);
+				
 				//Ignore out of bounds areas
-				if(board.getNodes()[j+1][i+1].getColour() == INVALID)
+				if(type.equals("invalid"))
 					continue;
 				
 				//Add corner pieces
-				if((i==0 && j==0) || //top left corner
-					(i==0 && j==N-1) || //top right corner
-					(i==(2*N -2) && j==(2*N -2)) || //bottom right corner
-					(i==(2*N -2) && j==(N-1)) || //bottom left corner
-					(i==(N-1) && j==0) || //middle left corner
-					(i==(N-1) && j==(2*N-2))) //middle right corner
+				else if(type.equals("corner"))
 				{
-					board.getNodes()[j+1][i+1].setUtility(0);
+					board.getNodes()[j+1][i+1].setUtility(1);
 					queue.add(board.getNodes()[j+1][i+1]);
 				}
 				
 				//Add edge pieces
-				else if( (i==0) || //top edge
-						(j==0) || //upper left edge
-						(i==(2*N-2)) || //bottom edge
-						(j==(2*N-2)) || //bottom right edge
-						((i>=N) && (j<N)) || //bottom left edge
-						((i<N) && (j>=N)) //upper right edge
-						)
+				else if(type.equals("edge"))
 				{
-					board.getNodes()[j+1][i+1].setUtility(2);
+					board.getNodes()[j+1][i+1].setUtility(300);
 					queue.add(board.getNodes()[j+1][i+1]);
 				}
 				
 				//Add near-corner pieces
-				else if( ( i==1 && j==1) || //top left
-						(i==(2*N-3) && j==(2*N-3)) || //bottom right
-						(i==(2*N-3) && j==(N-1) ) || //bottom left
-						(i==N-1 && j==1) || //middle left
-						(i==N-1 && j==(2*N-3)) || //middle right
-						(i==1 && j==N-1) //top right
-						)
+				else if(type.equals("near_edge"))
 				{
-					board.getNodes()[j+1][i+1].setUtility(3);
+					board.getNodes()[j+1][i+1].setUtility(400);
 					queue.add(board.getNodes()[j+1][i+1]);
 				}
 				
 				//Other pieces
 				else
 				{
-					board.getNodes()[j+1][i+1].setUtility(1);
+					board.getNodes()[j+1][i+1].setUtility(2);
 					queue.add(board.getNodes()[j+1][i+1]);
 				}
 			}
@@ -160,7 +196,24 @@ public class TestPlayer2 implements Player, Piece {
 			if(move.Row+r[i] < 0 || move.Col+c[i] < 0 || board.getNodes()[move.Col+c[i]][move.Row+r[i]].getColour() != EMPTY)
 				continue;
 			
-			int newUtility = board.getNodes()[move.Col+c[i]][move.Row+r[i]].getUtility()+30;
+			int newUtility = board.getNodes()[move.Col+c[i]][move.Row+r[i]].getUtility();
+			
+			if(move.P != this.piece)
+				newUtility += 1000;
+			else
+				newUtility += 1000;
+			
+			String type = checkPositionType(move.Row+r[i],move.Col+c[i]);
+			
+			if(type.equals("near_edge"))
+				newUtility += 400;
+			else if(type.equals("edge"))
+				newUtility += 300;
+			else if(type.equals("normal"))
+				newUtility += 200;
+			else if(type.equals("corner"))
+				newUtility += 100;
+				
 			board.getNodes()[move.Col+c[i]][move.Row+r[i]].setUtility(newUtility);
 			queue.add(board.getNodes()[move.Col+c[i]][move.Row+r[i]]);
 		}
