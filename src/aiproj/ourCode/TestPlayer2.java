@@ -1,10 +1,8 @@
 package aiproj.ourCode;
 
 //TODO
-//Check that r and c aren't switched in some places
-//Check that priority queue is putting new values in the right place
-//Change so that adjacent positions with more strategic value are recognized and given more points
-//Change to be forward-looking, i.e. change utility points added if choosing position would yield more high point options
+//Determine closeness of either player to a win
+//Further refine utility values to accurately represent priorities
 
 import aiproj.fencemaster.Move;
 import aiproj.fencemaster.Piece;
@@ -182,6 +180,27 @@ public class TestPlayer2 implements Player, Piece {
 	}
 	
 	/**
+	 * Get utility of a certain type of position
+	 * @param type
+	 * @return
+	 */
+	private int getUtilityForPositionType(String type)
+	{
+		int newUtility = 0;
+		
+		if(type.equals("near_edge"))
+			newUtility += 400;
+		else if(type.equals("edge"))
+			newUtility += 1000;
+		else if(type.equals("normal"))
+			newUtility += 200;
+		else if(type.equals("corner"))
+			newUtility += 100;
+		
+		return newUtility;
+	}
+	
+	/**
 	 * Update utility of positions directly surrounding a move
 	 * @param move
 	 */
@@ -193,29 +212,40 @@ public class TestPlayer2 implements Player, Piece {
 		
 		for(int i=0;i<6;i++)
 		{
-			if(move.Row+r[i] < 0 || move.Col+c[i] < 0 || board.getNodes()[move.Col+c[i]][move.Row+r[i]].getColour() != EMPTY)
+			int this_r = move.Row + r[i];
+			int this_c = move.Col +c[i];
+			
+			if(this_r < 0 || this_c < 0 || board.getNodes()[this_c][this_r].getColour() != EMPTY)
 				continue;
 			
-			int newUtility = board.getNodes()[move.Col+c[i]][move.Row+r[i]].getUtility();
+			int newUtility = board.getNodes()[this_c][this_r].getUtility();
 			
+			//Add higher utility value if the move was made by an opponent (creates an aggressive agent) 
 			if(move.P != this.piece)
-				newUtility += 1000;
+				newUtility += 2000;
 			else
 				newUtility += 1000;
 			
-			String type = checkPositionType(move.Row+r[i],move.Col+c[i]);
+			String type = checkPositionType(this_r,this_c);
+			newUtility += getUtilityForPositionType(type);
 			
-			if(type.equals("near_edge"))
-				newUtility += 400;
-			else if(type.equals("edge"))
-				newUtility += 300;
-			else if(type.equals("normal"))
-				newUtility += 200;
-			else if(type.equals("corner"))
-				newUtility += 100;
+			//Increase utility of this position if it is next to valid non-taken high utility positions
+			for(int j=0;j<6;j++)
+			{
+				int next_r = this_r + r[j];
+				int next_c = this_c + c[j];
 				
-			board.getNodes()[move.Col+c[i]][move.Row+r[i]].setUtility(newUtility);
-			queue.add(board.getNodes()[move.Col+c[i]][move.Row+r[i]]);
+				if(next_r < 0 || next_c < 0 || board.getNodes()[next_c][next_r].getColour() != EMPTY)
+					continue;
+				
+				String next_type = checkPositionType(next_r,next_c);
+				newUtility += getUtilityForPositionType(next_type)/10;
+			}
+			
+			
+				
+			board.getNodes()[this_c][this_r].setUtility(newUtility);
+			queue.add(board.getNodes()[this_c][this_r]);
 		}
 		
 	}
