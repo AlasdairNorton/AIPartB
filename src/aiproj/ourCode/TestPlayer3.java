@@ -6,13 +6,14 @@ import aiproj.fencemaster.Piece;
 import aiproj.fencemaster.Player;
 
 import java.io.PrintStream;
-import java.util.Scanner;
+
 
 /* Second test player class, attempt to implement minimax search */
 public class TestPlayer3 implements Player, Piece {
 
 	private Board board;
 	private int piece;
+	private static final int MAX_DEPTH = 3;
 	
 	@Override
 	public int getWinner() {
@@ -49,7 +50,7 @@ public class TestPlayer3 implements Player, Piece {
 				move = new Move(piece, false, board.getSize()*2-3, board.getSize()*2-3);
 			}
 		} else {
-			Minimax searchAgent = new Minimax(board, 1, piece);
+			Minimax searchAgent = new Minimax(board, MAX_DEPTH, piece);
 			move = searchAgent.minimaxDecision();
 		}
 
