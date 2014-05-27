@@ -91,7 +91,7 @@ public class TestPlayer2 implements Player, Piece {
 		String type;
 		int N = board.getSize();
 		
-		if(i < 0 || j < 0 || i >= 2*N || j >= 2*N || board.getNodes()[j+1][i+1].getColour() == INVALID)
+		if(i < 0 || j < 0 || i >= 2*N || j >= 2*N || board.getNodes()[i+1][j+1].getColour() == INVALID)
 			type = "invalid";
 		
 		else if((i==0 && j==0) || //top left corner
@@ -151,29 +151,29 @@ public class TestPlayer2 implements Player, Piece {
 				//Add corner pieces
 				else if(type.equals("corner"))
 				{
-					board.getNodes()[j+1][i+1].setUtility(1);
-					queue.add(board.getNodes()[j+1][i+1]);
+					board.getNodes()[i+1][j+1].setUtility(1);
+					queue.add(board.getNodes()[i+1][j+1]);
 				}
 				
 				//Add edge pieces
 				else if(type.equals("edge"))
 				{
-					board.getNodes()[j+1][i+1].setUtility(300);
-					queue.add(board.getNodes()[j+1][i+1]);
+					board.getNodes()[i+1][j+1].setUtility(300);
+					queue.add(board.getNodes()[i+1][j+1]);
 				}
 				
 				//Add near-corner pieces
 				else if(type.equals("near_edge"))
 				{
-					board.getNodes()[j+1][i+1].setUtility(400);
-					queue.add(board.getNodes()[j+1][i+1]);
+					board.getNodes()[i+1][j+1].setUtility(400);
+					queue.add(board.getNodes()[i+1][j+1]);
 				}
 				
 				//Other pieces
 				else
 				{
-					board.getNodes()[j+1][i+1].setUtility(2);
-					queue.add(board.getNodes()[j+1][i+1]);
+					board.getNodes()[i+1][j+1].setUtility(2);
+					queue.add(board.getNodes()[i+1][j+1]);
 				}
 			}
 		}
@@ -184,7 +184,7 @@ public class TestPlayer2 implements Player, Piece {
 	 * @param type
 	 * @return
 	 */
-	private int getUtilityForPositionType(String type)
+	private int getUtilityForPositionType(String type,int colour)
 	{
 		int newUtility = 0;
 		
@@ -196,6 +196,11 @@ public class TestPlayer2 implements Player, Piece {
 			newUtility += 200;
 		else if(type.equals("corner"))
 			newUtility += 100;
+		
+		if(colour != this.piece && colour != EMPTY)
+			newUtility += 5000;
+		else
+			newUtility += 10;
 		
 		return newUtility;
 	}
@@ -210,24 +215,21 @@ public class TestPlayer2 implements Player, Piece {
 		int r[] = {0,-1,-1,0,1,1};
 		int c[] = {-1,-1,0,1,1,0};
 		
+		//Count of how many opponent pieces are 
+		int enemy_piece_count = 0;
+		
 		for(int i=0;i<6;i++)
 		{
 			int this_r = move.Row + r[i];
 			int this_c = move.Col +c[i];
 			
-			if(this_r < 0 || this_c < 0 || board.getNodes()[this_c][this_r].getColour() != EMPTY)
+			if(this_r < 0 || this_c < 0 || board.getNodes()[this_r][this_c].getColour() != EMPTY)
 				continue;
 			
-			int newUtility = board.getNodes()[this_c][this_r].getUtility();
-			
-			//Add higher utility value if the move was made by an opponent (creates an aggressive agent) 
-			if(move.P != this.piece)
-				newUtility += 2000;
-			else
-				newUtility += 1000;
+			int newUtility = board.getNodes()[this_r][this_c].getUtility();
 			
 			String type = checkPositionType(this_r,this_c);
-			newUtility += getUtilityForPositionType(type);
+			newUtility += getUtilityForPositionType(type,move.P);
 			
 			//Increase utility of this position if it is next to valid non-taken high utility positions
 			for(int j=0;j<6;j++)
@@ -235,17 +237,18 @@ public class TestPlayer2 implements Player, Piece {
 				int next_r = this_r + r[j];
 				int next_c = this_c + c[j];
 				
-				if(next_r < 0 || next_c < 0 || board.getNodes()[next_c][next_r].getColour() != EMPTY)
+				if(next_r < 0 || next_c < 0)
 					continue;
 				
 				String next_type = checkPositionType(next_r,next_c);
-				newUtility += getUtilityForPositionType(next_type)/10;
+				int next_colour = board.getNodes()[next_r][next_c].getColour();
+				newUtility += getUtilityForPositionType(next_type,next_colour)/100;
 			}
 			
 			
 				
-			board.getNodes()[this_c][this_r].setUtility(newUtility);
-			queue.add(board.getNodes()[this_c][this_r]);
+			board.getNodes()[this_r][this_c].setUtility(newUtility);
+			queue.add(board.getNodes()[this_r][this_c]);
 		}
 		
 	}
@@ -273,7 +276,7 @@ public class TestPlayer2 implements Player, Piece {
 			p = queue.remove();
 		}
 		
-		Move move = new Move(piece, false, r, c);
+		Move move = new Move(piece, false, c, r);
 		board.getNodes()[c+1][r+1].setColour(piece);
 		updateQueue(move);
 		return move;
@@ -296,9 +299,9 @@ public class TestPlayer2 implements Player, Piece {
 			 * 2. That piece is at the coordinates specified
 			 * 3. It is this player's piece
 			 */
-			if(board.getNumPieces()==1 && board.getNodes()[m.Col+1][m.Row+1].getColour()==this.piece){
+			if(board.getNumPieces()==1 && board.getNodes()[m.Row+1][m.Col+1].getColour()==this.piece){
 				/* Perform swap, return success */
-				board.getNodes()[m.Col+1][m.Row+1].setColour(m.P);
+				board.getNodes()[m.Row+1][m.Col+1].setColour(m.P);
 				updateQueue(m);
 				return 0;
 			}else{
@@ -311,8 +314,8 @@ public class TestPlayer2 implements Player, Piece {
 		}
 		
 		/* If not swap, check position specified is legal, empty */
-		if(board.getNodes()[m.Col+1][m.Row+1].getColour() == EMPTY){
-			board.getNodes()[m.Col+1][m.Row+1].setColour(m.P);
+		if(board.getNodes()[m.Row+1][m.Col+1].getColour() == EMPTY){
+			board.getNodes()[m.Row+1][m.Col+1].setColour(m.P);
 			updateQueue(m);
 			return 0;
 		}
