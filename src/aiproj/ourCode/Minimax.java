@@ -6,6 +6,9 @@ import java.util.Arrays;
 import aiproj.fencemaster.Piece;
 import aiproj.fencemaster.Move;
 
+
+// Pruning "works" - it doesn't change the decision making, but doesn't significantly increase speed
+// E.g. at depth 3, avg 30k moves w/o pruning, 10-20k with pruning - still too slow given limits
 public class Minimax implements Piece {
 	private MinimaxBoard root;
 	private int maxDepth;
@@ -25,7 +28,7 @@ public class Minimax implements Piece {
 		int j, index=0;
 		double maxVal=-1;
 		for(int i=0;i<moveList.length;i++){
-			moveVals[i] = minimaxValue(moveList[i], root);
+			moveVals[i] = minValue(moveList[i], root,-1, 1);
 		}
 		for(j=0;j<moveVals.length;j++){
 			if(moveVals[j]>maxVal){
@@ -33,8 +36,78 @@ public class Minimax implements Piece {
 				index = j;
 			}
 		}
-		System.out.println(maxVal);
+		System.out.println("Nodes seen:"+nodesSeen);
 		return moveList[index];
+	}
+	
+	public double maxValue(Move move, MinimaxBoard prev, double alpha, double beta){
+		nodesSeen+=1;
+		MinimaxBoard current = new MinimaxBoard(prev, move);
+		/* Check terminal, maxDepth */
+		if(current.testWin() == BLACK || current.testWin() == WHITE){
+			/* Board in final state */
+			if(current.testWin() == root.getColour()){
+				/* Winning state for current player */
+				return 1;
+			} else {
+				/* Losing state for current player, or draw
+				 * Draws will be considered as losses by this
+				 * heuristic */
+				return -1;
+			}
+		}
+		if(current.getDepth() == maxDepth){
+			return getScore(current);
+		}
+		/* Else recurse
+		 * 1. Make list of next moves
+		 * 2. Get scores for each move */
+		Move[] moveList = generateMoves(current, current.getColour());
+		for(int i=0;i<moveList.length;i++){
+			 if(minValue(moveList[i], current, alpha, beta)>alpha){
+				 alpha = minValue(moveList[i], current, alpha, beta);
+			 }
+			 if(alpha>=beta){
+				 return beta;
+			 }
+		}
+
+		return alpha;
+	}
+	
+	public double minValue(Move move, MinimaxBoard prev, double alpha, double beta){
+		nodesSeen+=1;
+		MinimaxBoard current = new MinimaxBoard(prev, move);
+		/* Check terminal, maxDepth */
+		if(current.testWin() == BLACK || current.testWin() == WHITE){
+			/* Board in final state */
+			if(current.testWin() == root.getColour()){
+				/* Winning state for current player */
+				return 1;
+			} else {
+				/* Losing state for current player, or draw
+				 * Draws will be considered as losses by this
+				 * heuristic */
+				return -1;
+			}
+		}
+		if(current.getDepth() == maxDepth){
+			return getScore(current);
+		}
+		/* Else recurse
+		 * 1. Make list of next moves
+		 * 2. Get scores for each move */
+		Move[] moveList = generateMoves(current, current.getColour());
+		for(int i=0;i<moveList.length;i++){
+			 if(maxValue(moveList[i], current, alpha, beta)<beta){
+				 beta = maxValue(moveList[i], current, alpha, beta);
+			 }
+			 if(beta<=alpha){
+				 return alpha;
+			 }
+		}
+
+		return beta;
 	}
 	
 	public double minimaxValue(Move move, MinimaxBoard prev){
@@ -85,11 +158,10 @@ public class Minimax implements Piece {
 			}
 			return minVal;
 		}
-		
-		/* To placate error messages;
-		 * control cannot actually reach this statement */
 		return 0;
 	}
+		
+
 	
 	public double getScore(MinimaxBoard board){
 		/* Function to calculate the heuristic value of a given board state
