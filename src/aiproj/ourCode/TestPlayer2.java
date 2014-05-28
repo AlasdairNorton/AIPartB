@@ -130,6 +130,13 @@ public class TestPlayer2 implements Player, Piece {
 		return type;
 	}
 	
+	/**
+	 * Gets total count of enemy pieces surrounding a position
+	 * @param row
+	 * @param col
+	 * @param enemyColour
+	 * @return
+	 */
 	private int getEnemyPieceCount(int row,int col, int enemyColour)
 	{
 		int enemyCount = 0;
@@ -242,11 +249,6 @@ public class TestPlayer2 implements Player, Piece {
 		
 		int utilityMultiplier = 1;
 		
-		//If move was made by opponent, check how many same coloured pieces are adjacent to the piece they placed.
-		//More pieces indicate higher likelihood of trying to complete a loop or tripod.
-		//Increment the utilityMultiplier to highly weight these positions as they are potential loop-blockers
-		if(move.P != this.piece)
-			utilityMultiplier += getEnemyPieceCount(move.Row,move.Col,move.P);
 		
 		for(int i=0;i<6;i++)
 		{
@@ -260,6 +262,12 @@ public class TestPlayer2 implements Player, Piece {
 			
 			String type = checkPositionType(this_r,this_c);
 			newUtility += getUtilityForPositionType(type,move.P);
+			
+			//If move was made by opponent, check how many same coloured pieces are adjacent to each surrounding position
+			//More pieces indicate higher likelihood of trying to complete a loop.
+			//Increment the utilityMultiplier to highly weight these positions as they are potential loop-blockers
+			if(move.P != this.piece)
+				utilityMultiplier += getEnemyPieceCount(this_r,this_c,move.P);
 			
 			//Increase utility of this position if it's next to many high utility empty positions or opponent pieces
 			for(int j=0;j<6;j++)

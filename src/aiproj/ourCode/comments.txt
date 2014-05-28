@@ -4,7 +4,14 @@ Mostafa Rizk (mrizk)
 -Briefly describe the structure of the code you have implemented
 -Describe the approach taken in your solution, in terms of (a) your search strategy, (b) your evaluation function, and (c) any 
 creative techniques that you have applied
+---------------------------------------------------------------------------------
+Our structure is as follows:
 
+TestPlayer2.java has a function updateQueue() which does the bulk of the work of calculating utilities and is called in both 
+makeMove() and opponentMove(). It calls on  getPositionType(), getEnemyPieceCount() and getUtilityForPositionType() to help it. 
+makeMove() also calls rateBoard() to calculate initial board utility values.
+
+---------------------------------------------------------------------------------
 Our solution operates as follows:
 
 1) Give each board position an initial utility rating based on the strategic values of different position types. 'Near edge' 
@@ -14,14 +21,20 @@ All other positions are 'normal' positions and are valued between 'corner' and '
 priority queue.
 
 2) Update the priority queue after each move 'm' as each move only affects the utility of the positions immediately around it. There 
-are multiple components to this step:
+are multiple components to this step (Fig 1 gives illustration)
 
 a) Increment utility of positions surrounding 'm' according to their type (e.g. corner, near-edge etc). Positions of a valuable type 
 are awarded more points so they aren't overshadowed by low-value positions that happen to have many occupied neighbours.
 b) For each position 'i' surrounding move 'm', look forward to all positions surrounding 'i'. Give 'i' higher utility if it's 
 next to empty positions with a valuable type and/or pieces belonging to the opponent. Utility is also incremented if 'i' is next to 
 pieces of the agent's own colour but more utility is awarded for being near opponent pieces, this makes the agent more aggressive.
-c) If move 'm' was made by an opponent, count how many same-coloured pieces are adjacent to 'm' multiply the final utility by 1*count. 
+c) If move 'm' was made by an opponent, look at each surrounding position 'i' and count how many pieces of the same colour as 'm' 
+are surrounding 'i'. Multiply the final utility by 1+count. 
 This gives higher weight to positions that are likely to become part of a loop
+
+Fig 1:
+i i i
+i m i
+i i i
 
 3) When making a move, go through the priority queue until an empty position is found. This is the most highly valued empty position.
