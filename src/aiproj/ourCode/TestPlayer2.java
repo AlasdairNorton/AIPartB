@@ -17,7 +17,7 @@ public class TestPlayer2 implements Player, Piece {
 	private Board board;
 	private int piece;
 	
-	//private int board_size = board.getSize();
+	//Priority queue for keeping track of which positions have the highest utility
 	private PriorityQueue<Position> queue = new PriorityQueue<Position> (10, Collections.reverseOrder());
 	
 	@Override
@@ -80,7 +80,7 @@ public class TestPlayer2 implements Player, Piece {
 	}
 	
 	/**
-	 * Given row i and column j, determines whether the position is a corner, edge, etc. 
+	 * Given row i and column j, determines whether the position is of type corner, edge, near-edge or normal 
 	 * @param i
 	 * @param j
 	 * @return type of position
@@ -122,7 +122,7 @@ public class TestPlayer2 implements Player, Piece {
 				(i==1 && j==N-1) //top right
 				)
 		{
-			type = "near_edge";
+			type = "near_edge";//This is a position that is 1 move away from two edges e.g. (1,1)
 		}
 		
 		else type = "normal";
@@ -179,7 +179,10 @@ public class TestPlayer2 implements Player, Piece {
 	}
 	
 	/**
-	 * Get utility of a certain type of position
+	 * Get utility of a position with a certain type.
+	 * Also, if a position is occupied by the opponent, it is given a high utility even though it can't technically be taken.
+	 * This is so when forward-looking is used to determine if a position will yield even more high utility positions, 
+	 * high value is given to a position that is close to multiple opponent pieces (thus blocking loops)
 	 * @param type
 	 * @return
 	 */
@@ -198,8 +201,8 @@ public class TestPlayer2 implements Player, Piece {
 		
 		if(colour != this.piece && colour != EMPTY)
 			newUtility += 5000;
-		else
-			newUtility += 10;
+		else if (colour != EMPTY)
+			newUtility += 2000;
 		
 		return newUtility;
 	}
@@ -214,9 +217,6 @@ public class TestPlayer2 implements Player, Piece {
 		int r[] = {0,-1,-1,0,1,1};
 		int c[] = {-1,-1,0,1,1,0};
 		
-		//Count of how many opponent pieces are 
-		int enemy_piece_count = 0;
-		
 		for(int i=0;i<6;i++)
 		{
 			int this_r = move.Row + r[i];
@@ -230,7 +230,7 @@ public class TestPlayer2 implements Player, Piece {
 			String type = checkPositionType(this_r,this_c);
 			newUtility += getUtilityForPositionType(type,move.P);
 			
-			//Increase utility of this position if it is next to valid non-taken high utility positions
+			//Increase utility of this position if it's next to many high utility empty positions or opponent pieces
 			for(int j=0;j<6;j++)
 			{
 				int next_r = this_r + r[j];
@@ -241,6 +241,8 @@ public class TestPlayer2 implements Player, Piece {
 				
 				String next_type = checkPositionType(next_r,next_c);
 				int next_colour = board.getNodes()[next_r][next_c].getColour();
+				
+				//Divided by 100 to avoid penalizing edges (which can't gain much utility here because they have fewer neighbors)
 				newUtility += getUtilityForPositionType(next_type,next_colour)/100;
 			}
 			
@@ -262,6 +264,8 @@ public class TestPlayer2 implements Player, Piece {
 		int r = 0, c = 0;
 
 		Position p = queue.remove();//Get top value from Priority Queue
+		
+		//Traverse queue until find the highest valued empty position and move there.
 		while(!queue.isEmpty())
 		{
 			r = p.getX();
