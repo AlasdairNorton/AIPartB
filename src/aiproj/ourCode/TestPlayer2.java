@@ -210,9 +210,9 @@ public class TestPlayer2 implements Player, Piece {
 	
 	/**
 	 * Get utility of a position with a certain type.
-	 * Also, if a position is occupied by the opponent, it is given a high utility even though it can't technically be taken.
-	 * This is so when forward-looking is used to determine if a position will yield even more high utility positions, 
-	 * high value is given to a position that is close to multiple opponent pieces (thus blocking loops)
+	 * When function is used for 'forward looking' from an empty position, returns high utility values for positions occupied by
+	 * opponent pieces. This gives the empty position a higher value if it's surrounded by enemy pieces because it's a potential 
+	 * loop blocker
 	 * @param type
 	 * @return
 	 */
@@ -229,6 +229,8 @@ public class TestPlayer2 implements Player, Piece {
 		else if(type.equals("corner"))
 			newUtility += 100;
 		
+		//Higher utility is given to enemy pieces, meaning the agent is aggressive and tries to block the opponent before trying to 
+		//complete its own loops
 		if(colour != this.piece && colour != EMPTY)
 			newUtility += 5000;
 		else if (colour != EMPTY)

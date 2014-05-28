@@ -24,13 +24,14 @@ priority queue.
 are multiple components to this step (Fig 1 gives illustration)
 
 a) Increment utility of positions surrounding 'm' according to their type (e.g. corner, near-edge etc). Positions of a valuable type 
-are awarded more points so they aren't overshadowed by low-value positions that happen to have many occupied neighbours.
+are incremented by larger amounts so they aren't overshadowed by low-value positions that happen to have many occupied neighbours.
 b) For each position 'i' surrounding move 'm', look forward to all positions surrounding 'i'. Give 'i' higher utility if it's 
 next to empty positions with a valuable type and/or pieces belonging to the opponent. Utility is also incremented if 'i' is next to 
-pieces of the agent's own colour but more utility is awarded for being near opponent pieces, this makes the agent more aggressive.
+pieces of the agent's own colour but more utility is awarded for being near opponent pieces, this makes the agent more focused on 
+blocking the opponent rather than completing its own loops.
 c) If move 'm' was made by an opponent, look at each surrounding position 'i' and count how many pieces of the same colour as 'm' 
-are surrounding 'i'. Multiply the final utility by 1+count. 
-This gives higher weight to positions that are likely to become part of a loop
+are surrounding 'i'. Multiply the final utility by 1+count. This gives higher weight to positions that are likely to become part of 
+a loop
 
 Fig 1:
 i i i
