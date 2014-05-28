@@ -1,5 +1,8 @@
 package aiproj.ourCode;
 
+/* Alasdair Norton (ajnorton)
+ * Mostafa Rizk (mrizk) */
+
 import java.util.ArrayList;
 
 import aiproj.fencemaster.Move;

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 
+//implements comparator and comparable to allow Position values to be sorted by their utility
 public class Position implements Piece,Comparator<Position>, Comparable<Position>{
 	/* The tile's x coordinate */
 	private int x;

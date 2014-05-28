@@ -1,8 +1,7 @@
 package aiproj.ourCode;
 
-//TODO
-//Determine closeness of either player to a win
-//Further refine utility values to accurately represent priorities
+/* Alasdair Norton (ajnorton)
+ * Mostafa Rizk (mrizk) */
 
 import aiproj.fencemaster.Move;
 import aiproj.fencemaster.Piece;

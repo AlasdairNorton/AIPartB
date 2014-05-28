@@ -1,5 +1,7 @@
 package aiproj.ourCode;
 
+/* Alasdair Norton (ajnorton)
+ * Mostafa Rizk (mrizk) */
 
 import aiproj.fencemaster.Move;
 import aiproj.fencemaster.Piece;
