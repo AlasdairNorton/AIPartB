@@ -13,13 +13,15 @@ efficiently. Edge positions are second most valuable. Corner positions are worth
 All other positions are 'normal' positions and are valued between 'corner' and 'edge' positions. Positions are then placed in a 
 priority queue.
 
-2) Update the priority queue after each move 'm' as each move only affects the utility of the positions immediately around it. This 
-is done in two steps:
+2) Update the priority queue after each move 'm' as each move only affects the utility of the positions immediately around it. There 
+are multiple components to this step:
 
 a) Increment utility of positions surrounding 'm' according to their type (e.g. corner, near-edge etc). Positions of a valuable type 
 are awarded more points so they aren't overshadowed by low-value positions that happen to have many occupied neighbours.
 b) For each position 'i' surrounding move 'm', look forward to all positions surrounding 'i'. Give 'i' higher utility if it's 
 next to empty positions with a valuable type and/or pieces belonging to the opponent. Utility is also incremented if 'i' is next to 
 pieces of the agent's own colour but more utility is awarded for being near opponent pieces, this makes the agent more aggressive.
+c) If move 'm' was made by an opponent, count how many same-coloured pieces are adjacent to 'm' multiply the final utility by 1*count. 
+This gives higher weight to positions that are likely to become part of a loop
 
 3) When making a move, go through the priority queue until an empty position is found. This is the most highly valued empty position.

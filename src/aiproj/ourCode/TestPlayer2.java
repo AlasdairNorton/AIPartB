@@ -130,6 +130,29 @@ public class TestPlayer2 implements Player, Piece {
 		return type;
 	}
 	
+	private int getEnemyPieceCount(int row,int col, int enemyColour)
+	{
+		int enemyCount = 0;
+		
+		int r[] = {0,-1,-1,0,1,1};
+		int c[] = {-1,-1,0,1,1,0};
+		
+		for(int i=0;i<6;i++)
+		{
+			int this_r = row + r[i];
+			int this_c = col +c[i];
+			
+			if(this_r < 0 || this_c < 0)
+				continue;
+			
+			if(board.getNodes()[this_r][this_c].getColour() == enemyColour)
+				enemyCount++;
+			
+		}
+		
+		return enemyCount;
+	}
+	
 	/**
 	 * Rates utility of different board positions prior to any moves being made
 	 */
@@ -217,6 +240,14 @@ public class TestPlayer2 implements Player, Piece {
 		int r[] = {0,-1,-1,0,1,1};
 		int c[] = {-1,-1,0,1,1,0};
 		
+		int utilityMultiplier = 1;
+		
+		//If move was made by opponent, check how many same coloured pieces are adjacent to the piece they placed.
+		//More pieces indicate higher likelihood of trying to complete a loop or tripod.
+		//Increment the utilityMultiplier to highly weight these positions as they are potential loop-blockers
+		if(move.P != this.piece)
+			utilityMultiplier += getEnemyPieceCount(move.Row,move.Col,move.P);
+		
 		for(int i=0;i<6;i++)
 		{
 			int this_r = move.Row + r[i];
@@ -247,7 +278,7 @@ public class TestPlayer2 implements Player, Piece {
 			}
 			
 			
-				
+			newUtility *= utilityMultiplier;	
 			board.getNodes()[this_r][this_c].setUtility(newUtility);
 			queue.add(board.getNodes()[this_r][this_c]);
 		}
