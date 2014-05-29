@@ -1,4 +1,4 @@
-package aiproj.fencemaster.ajnorton;
+package aiproj.ourCode;
 
 /* Alasdair Norton (ajnorton)
  * Mostafa Rizk (mrizk) */
