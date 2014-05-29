@@ -1,4 +1,4 @@
-package aiproj.ourCode;
+package aiproj.fencemaster.ajnorton;
 
 /* Alasdair Norton (ajnorton)
  * Mostafa Rizk (mrizk) */
@@ -8,19 +8,23 @@ import aiproj.fencemaster.Piece;
 /* A group of connected pieces of the same colour. */
 public class Cluster implements Piece{
 	private ArrayList<Position> nodes;
+	private Boolean didChange;
 
 	/* Colour of the pieces in the cluster defined by piece interface*/
 	private int colour;
+
+
+	public Cluster(int colour){
+		nodes = new ArrayList<Position>(0);
+		this.colour = colour;
+		this.didChange = true;
+	}
+	
 	public int getColour() {
 		return colour;
 	}
 
 	public void setColour(int colour) {
-		this.colour = colour;
-	}
-
-	public Cluster(int colour){
-		nodes = new ArrayList<Position>(0);
 		this.colour = colour;
 	}
 	
@@ -106,5 +110,13 @@ public class Cluster implements Piece{
 			tripodSum+=edges[i];
 		}
 		return tripodSum>=3;
+	}
+
+	public Boolean getDidChange() {
+		return didChange;
+	}
+
+	public void setDidChange(Boolean didChange) {
+		this.didChange = didChange;
 	}
 }
