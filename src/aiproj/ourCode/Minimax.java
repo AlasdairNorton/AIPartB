@@ -3,8 +3,10 @@ package aiproj.ourCode;
 /* Alasdair Norton (ajnorton)
  * Mostafa Rizk (mrizk) */
 
+
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.PriorityQueue;
 
 import aiproj.fencemaster.Piece;
 import aiproj.fencemaster.Move;
@@ -17,6 +19,9 @@ public class Minimax implements Piece {
 	private int maxDepth;
 	private int nodesSeen;
 	private int maxColour;
+	/* Number of children investigated
+	 * Determines branching factor 
+	 */
 	
 	public Minimax (Board initial, int maxDepth, int colour){
 		root = new MinimaxBoard(initial, colour);
@@ -30,15 +35,20 @@ public class Minimax implements Piece {
 		double[] moveVals = new double[moveList.length];
 		int j, index=0;
 		double maxVal=-1;
+		/* Populate moveVals list */
 		for(int i=0;i<moveList.length;i++){
-			moveVals[i] = minValue(moveList[i], root,-1, 1);
+			if(moveList[i]!=null){
+				moveVals[i] = minValue(moveList[i], root,-1, 1);
+			}
 		}
+		/* Return move with highest value */
 		for(j=0;j<moveVals.length;j++){
 			if(moveVals[j]>maxVal){
 				maxVal = moveVals[j];
 				index = j;
 			}
 		}
+		/* #### DIAGNOSTIC OUTPUT - REMOVE #### */
 		System.out.println("Nodes seen:"+nodesSeen);
 		return moveList[index];
 	}
@@ -67,7 +77,7 @@ public class Minimax implements Piece {
 		 * 2. Get scores for each move */
 		Move[] moveList = generateMoves(current, current.getColour());
 		for(int i=0;i<moveList.length;i++){
-			 if(minValue(moveList[i], current, alpha, beta)>alpha){
+			 if(moveList[i]!=null && minValue(moveList[i], current, alpha, beta)>alpha){
 				 alpha = minValue(moveList[i], current, alpha, beta);
 			 }
 			 if(alpha>=beta){
@@ -102,7 +112,7 @@ public class Minimax implements Piece {
 		 * 2. Get scores for each move */
 		Move[] moveList = generateMoves(current, current.getColour());
 		for(int i=0;i<moveList.length;i++){
-			 if(maxValue(moveList[i], current, alpha, beta)<beta){
+			 if(moveList[i]!=null && maxValue(moveList[i], current, alpha, beta)<beta){
 				 beta = maxValue(moveList[i], current, alpha, beta);
 			 }
 			 if(beta<=alpha){
@@ -113,6 +123,9 @@ public class Minimax implements Piece {
 		return beta;
 	}
 	
+	
+	/* Non-pruning minimax algorithm. Not called in final submission.
+	 */
 	public double minimaxValue(Move move, MinimaxBoard prev){
 		nodesSeen+=1;
 		MinimaxBoard current = new MinimaxBoard(prev, move);
@@ -142,7 +155,9 @@ public class Minimax implements Piece {
 		double[] moveVals = new double[moveList.length];
 		double maxVal = -1, minVal = 1;
 		for(int i=0;i<moveList.length;i++){
-			moveVals[i] = minimaxValue(moveList[i], current);
+			if(moveList[i]!=null){
+				moveVals[i] = minimaxValue(moveList[i], current);
+			}
 		}
 		
 		if(current.isMax()){
@@ -173,8 +188,6 @@ public class Minimax implements Piece {
 		 * Placeholder returns 0 to test rest of minimax algo. 
 		 */
 		double score=0;
-		board.clearClusters();
-		board.makeClusters();
 		int numPieces = board.getNumPieces();
 		/* Score each cluster separately */
 		/* Scoring tripods: each cluster is given a score out of 3;
@@ -285,13 +298,8 @@ public class Minimax implements Piece {
 	/* For the sake of efficiency, only checking positions
 	 * adjacent to existing clusters
 	 */
-	public Move[] generateMoves(MinimaxBoard board, int colour){
-		board.clearClusters();
-		board.makeClusters();
-		
-		
-		ArrayList<Move> moves = new ArrayList<Move>(0);
-		Move[] demoArray = new Move[1];
+	public Move[] generateMoves(MinimaxBoard board, int colour){	
+	    ArrayList<Move> moves = new ArrayList<Move>(0);
 		Move newMove;
 		for(Cluster clust: board.getClusters()){
 			for(Position pos: clust.getNodes()){
@@ -305,7 +313,7 @@ public class Minimax implements Piece {
 				}
 			}
 		}	
-		return moves.toArray(demoArray);
+		return moves.toArray(new Move[0]);
 	}
 
 	public MinimaxBoard getRoot() {
