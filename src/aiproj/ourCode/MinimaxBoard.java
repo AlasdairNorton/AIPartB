@@ -1,5 +1,4 @@
 package aiproj.ourCode;
-
 /* Alasdair Norton (ajnorton)
  * Mostafa Rizk (mrizk) */
 
@@ -18,7 +17,6 @@ public class MinimaxBoard extends Board {
 	
 	private boolean max;
 	private MinimaxBoard parent;
-	private ArrayList<MinimaxBoard> children;
 	private int colour;
 	private int depth;
 	
@@ -30,9 +28,9 @@ public class MinimaxBoard extends Board {
 	public MinimaxBoard(Board initial, int colour){
 		/* initialise Board variables */
 		super(initial.getSize());
+		Cluster newCluster;
 		setMax(true);
 		setParent(null);
-		setChildren(new ArrayList<MinimaxBoard>(0));
 		this.setDepth(0);
 		this.setColour(colour);
 		/* Set board state to the input's */
@@ -41,22 +39,33 @@ public class MinimaxBoard extends Board {
 				this.setNode(initial.getNodes()[i][j].getColour(), i, j);
 			}
 		}
+		/* Copy clusters from parent */
+		for(Cluster c: initial.getClusters()){
+			newCluster = new Cluster(c.getColour());
+			for(Position p: c.getNodes()){
+				newCluster.addNode(this.getNodes()[p.getY()][p.getX()]);
+				this.getNodes()[p.getY()][p.getX()].setParentCluster(newCluster);
+			}
+			newCluster.setDidChange(false);
+			this.getClusters().add(newCluster);
+		}
 	}
 	
 	
 	/**
-	 * @param parent The parent node in the minimax tree
+	 * @param prev The parent node in the minimax tree
 	 * @param move The move made to get from the parent state to this child state
 	 */
 	public MinimaxBoard(MinimaxBoard prev, Move move){
+		// Create board
 		super(prev.getSize());
+		Cluster newCluster;
 		if(prev.isMax()){
 			this.max = false;
 		} else {
 			this.max = true;
 		}
 		this.parent = prev;
-		this.children = new ArrayList<MinimaxBoard>(0);
 		this.setDepth(parent.getDepth()+1);
 		if(parent.getColour()==WHITE){
 			this.colour = BLACK;
@@ -64,18 +73,33 @@ public class MinimaxBoard extends Board {
 			this.colour = WHITE;
 		}
 		
-		/* Set board state to the input's */
+		
+		/* Set board state to the parent's */
 		for(int i=0; i<2*this.getArraySize()-1;i++){
 			for(int j=0; j<2*this.getArraySize()-1;j++){
 				this.setNode(prev.getNodes()[i][j].getColour(), i, j);
 			}
 		}
 		
+		/* Copy clusters from parent */
+		for(Cluster c: prev.getClusters()){
+			newCluster = new Cluster(c.getColour());
+			for(Position p: c.getNodes()){
+				newCluster.addNode(this.getNodes()[p.getY()][p.getX()]);
+				this.getNodes()[p.getY()][p.getX()].setParentCluster(newCluster);
+			}
+			newCluster.setDidChange(false);
+			this.getClusters().add(newCluster);
+		}
+		
 		/* Update board state.
 		 * Only legal moves will be sent to this function, 
 		 * so no need to guard against bad moves here
 		 */
+	
 		setNode(move.P, move.Row+1, move.Col+1);
+
+		this.updateNearMove(move);
 	}
 
 
@@ -97,17 +121,6 @@ public class MinimaxBoard extends Board {
 	public void setParent(MinimaxBoard parent) {
 		this.parent = parent;
 	}
-
-
-	public ArrayList<MinimaxBoard> getChildren() {
-		return children;
-	}
-
-
-	public void setChildren(ArrayList<MinimaxBoard> children) {
-		this.children = children;
-	}
-
 
 	public int getColour() {
 		return colour;
