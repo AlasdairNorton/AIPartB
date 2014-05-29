@@ -15,7 +15,7 @@ public class TestPlayer3 implements Player, Piece {
 
 	private Board board;
 	private int piece;
-	private static final int MAX_DEPTH = 3;
+	private static final int MAX_DEPTH = 2;
 	
 	@Override
 	public int getWinner() {
@@ -27,15 +27,20 @@ public class TestPlayer3 implements Player, Piece {
 
 	@Override
 	public int init(int n, int p) {
-		// TODO Auto-generated method stub
-		board = new Board(n);
-		piece = p;
-		
-		/*Your implementation of this function should return a negative value if 
-		  it does not initialise successfully. - Are there any potential failures?
-		 */
+		try{
+			if(n>0 && (p==BLACK || p==WHITE)){
+				board = new Board(n);
+				piece = p;
+				return 0;
+			}else{
+				// Invalid input 
+				return -1;
+			}
+		} catch (Exception e){
+			return -1;
+		}
 	
-		return 0;
+
 	}
 
 	@Override
@@ -55,8 +60,9 @@ public class TestPlayer3 implements Player, Piece {
 			Minimax searchAgent = new Minimax(board, MAX_DEPTH, piece);
 			move = searchAgent.minimaxDecision();
 		}
-
 		board.getNodes()[move.Row+1][move.Col+1].setColour(piece);
+		board.clearClusters();
+		board.makeClusters();
 		return move;
 	}
 
@@ -80,6 +86,7 @@ public class TestPlayer3 implements Player, Piece {
 			if(board.getNumPieces()==1 && board.getNodes()[m.Row+1][m.Col+1].getColour()==this.piece){
 				/* Perform swap, return success */
 				board.getNodes()[m.Row+1][m.Col+1].setColour(m.P);
+				board.updateNearMove(m);
 				return 0;
 			}else{
 				/* Swap is illegal- there are too many pieces on the board
@@ -93,6 +100,7 @@ public class TestPlayer3 implements Player, Piece {
 		/* If not swap, check position specified is legal, empty */
 		if(board.getNodes()[m.Row+1][m.Col+1].getColour() == EMPTY){
 			board.getNodes()[m.Row+1][m.Col+1].setColour(m.P);
+			board.updateNearMove(m);
 			return 0;
 		}
 		
